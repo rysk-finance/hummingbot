@@ -13,3 +13,5 @@ TESTNET_WS_URL = "wss://api.ciaobella.dev/"
 PRODUCTS_URL = "v1/products"
 
 RATE_LIMITS = []
+
+LOGIN_MESSAGE = "I want to log into 100x.finance"
