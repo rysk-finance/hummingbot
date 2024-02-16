@@ -10,7 +10,7 @@ class Class100xPerpetualAuthTests(unittest.TestCase):
         super().setUp()
         self.network_address = "0x836eE2b55d173245832995082a8600709c38D099"
         self.private_key = "13e56ca9cceebf1f33065c2c5376ab38570a114bc1b003b60d838f92be9d7930"  # noqa: mock
-        self.auth_instance = Class100xPerpetualAuth(network_address=self.network_address, private_key=self.private_key)
+        self.auth_instance = Class100xPerpetualAuth(public_key=self.network_address, private_key=self.private_key)
 
     def test_login_message_generation(self):
         login_message = self.auth_instance._generate_eip_712_login_message()
@@ -51,7 +51,7 @@ class Class100xPerpetualAuthIntegrationTests(unittest.TestCase):
         super().setUp()
         self.network_address = "0x836eE2b55d173245832995082a8600709c38D099"
         self.private_key = "13e56ca9cceebf1f33065c2c5376ab38570a114bc1b003b60d838f92be9d7930"  # noqa: mock
-        self.auth_instance = Class100xPerpetualAuth(network_address=self.network_address, private_key=self.private_key)
+        self.auth_instance = Class100xPerpetualAuth(public_key=self.network_address, private_key=self.private_key)
 
     # Integration tests
     def test_authenticate_using_signature(self):

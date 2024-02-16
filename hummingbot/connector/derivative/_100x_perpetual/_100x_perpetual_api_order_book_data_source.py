@@ -1,0 +1,5 @@
+from hummingbot.core.data_type.perpetual_api_order_book_data_source import PerpetualAPIOrderBookDataSource
+
+
+class Class100xPerpetualAPIOrderBookDataSource(PerpetualAPIOrderBookDataSource):
+    pass
