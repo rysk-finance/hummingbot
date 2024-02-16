@@ -18,10 +18,10 @@ class LoginMessage(EIP712Struct):
 
 class Class100xPerpetualAuth(AuthBase):
 
-    def __init__(self, network_address: str, private_key: str):
+    def __init__(self, public_key: str, private_key: str):
         self.domain = make_domain(name="Ciao", version="0.0.0", chainId=168587773, verifyingContract="0xe5fCf48E0E06252b0b237b9237Ce6B4Ec2145aB0")
         self.private_key: str = private_key
-        self.network_address: str = network_address
+        self.public_key: str = public_key
         self.wallet = eth_account.Account.from_key(private_key)
         self.session_cookie = {}
 
@@ -30,7 +30,7 @@ class Class100xPerpetualAuth(AuthBase):
         return timestamp_ms
 
     def _generate_eip_712_login_message(self):
-        login_message = LoginMessage(account=self.network_address,
+        login_message = LoginMessage(account=self.public_key,
                                      message=LOGIN_MESSAGE,
                                      timestamp=self._current_timestamp()
                                      )
