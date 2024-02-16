@@ -11,6 +11,7 @@ TESTNET_WS_URL = "wss://api.ciaobella.dev/"
 
 # Public API v1 Endpoints
 PRODUCTS_URL = "v1/products"
+LOGIN = "v1/session/login"
 
 RATE_LIMITS = []
 

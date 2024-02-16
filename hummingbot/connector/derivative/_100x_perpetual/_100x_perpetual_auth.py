@@ -1,10 +1,12 @@
 import time
 
 import eth_account
+import requests
 from eip712_structs import Address, EIP712Struct, String, Uint, make_domain
 from eth_account.messages import encode_structured_data
 
 from hummingbot.connector.derivative._100x_perpetual._100x_perpetual_constants import LOGIN_MESSAGE
+from hummingbot.connector.derivative._100x_perpetual._100x_perpetual_web_utils import public_rest_url
 from hummingbot.core.web_assistant.auth import AuthBase
 
 
@@ -17,10 +19,11 @@ class LoginMessage(EIP712Struct):
 class Class100xPerpetualAuth(AuthBase):
 
     def __init__(self, network_address: str, private_key: str):
+        self.domain = make_domain(name="Ciao", version="0.0.0", chainId=168587773, verifyingContract="0xe5fCf48E0E06252b0b237b9237Ce6B4Ec2145aB0")
         self.private_key: str = private_key
         self.network_address: str = network_address
         self.wallet = eth_account.Account.from_key(private_key)
-        self.domain = make_domain(name="ciao", version="0.0.0", chainId=1337, verifyingContract="0x0000000000000000000000000000000000000000")
+        self.session_cookie = {}
 
     def _current_timestamp(self):
         timestamp_ms = int(time.time() * 1000)
@@ -49,6 +52,19 @@ class Class100xPerpetualAuth(AuthBase):
         signed = self._sign_eip_712_login_message(login_message)
         message = self._extract_message_append_signature(login_message, signed)
         return message
+
+    def create_authenticated_session_with_service(self):
+        login_payload = self._generate_authenticate_payload()
+        url = public_rest_url(path_url="v1/session/login", domain="testnet")
+        headers = {
+            "Content-type": "application/json",
+        }
+        response = requests.post(url, headers=headers, json=login_payload)
+
+        if response.status_code == 200:
+            response = response.json()
+            self.session_cookie = response
+        return response
 
     def rest_authenticate(self):
         # Implementation of REST authentication logic here

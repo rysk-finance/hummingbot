@@ -1,3 +1,4 @@
+import re
 import unittest
 
 from hummingbot.connector.derivative._100x_perpetual._100x_perpetual_auth import Class100xPerpetualAuth
@@ -42,6 +43,21 @@ class Class100xPerpetualAuthTests(unittest.TestCase):
         assert 'account' in login_payload, "The 'account' field is missing"
         assert 'timestamp' in login_payload, "The 'timestamp' field is missing"
 
+
+# @unittest.skip("Integration tests are slower running, comment to run")
+class Class100xPerpetualAuthIntegrationTests(unittest.TestCase):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.network_address = "0x836eE2b55d173245832995082a8600709c38D099"
+        self.private_key = "13e56ca9cceebf1f33065c2c5376ab38570a114bc1b003b60d838f92be9d7930"  # noqa: mock
+        self.auth_instance = Class100xPerpetualAuth(network_address=self.network_address, private_key=self.private_key)
+
+    # Integration tests
     def test_authenticate_using_signature(self):
-        # this will test the login endpoint
-        pass
+        session_info = self.auth_instance.create_authenticated_session_with_service()
+
+        self.assertIn('name', session_info)
+        self.assertEqual(session_info['name'], 'connectedAddress')
+        value_pattern = re.compile(r'^v2\.local\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$')
+        self.assertRegex(session_info['value'], value_pattern)
