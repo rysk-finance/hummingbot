@@ -1,11 +1,15 @@
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
+from bidict import bidict
+
 import hummingbot.connector.derivative._100x_perpetual._100x_perpetual_constants as CONSTANTS
+import hummingbot.connector.derivative._100x_perpetual._100x_perpetual_web_utils as web_utils
 from hummingbot.connector.constants import s_decimal_NaN
 from hummingbot.connector.derivative._100x_perpetual._100x_perpetual_auth import Class100xPerpetualAuth
 from hummingbot.connector.perpetual_derivative_py_base import PerpetualDerivativePyBase
 from hummingbot.connector.trading_rule import TradingRule
+from hummingbot.connector.utils import combine_to_hb_trading_pair
 from hummingbot.core.api_throttler.data_types import RateLimit
 from hummingbot.core.data_type.common import OrderType, PositionAction, PositionMode, TradeType
 from hummingbot.core.data_type.in_flight_order import InFlightOrder, OrderUpdate, TradeUpdate
@@ -19,6 +23,8 @@ if TYPE_CHECKING:
 
 
 class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
+    web_utils = web_utils
+
     def __init__(
             self,
             client_config_map: "ClientConfigAdapter",
@@ -44,7 +50,10 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
         pass
 
     def _create_web_assistants_factory(self) -> WebAssistantsFactory:
-        pass
+        return web_utils.build_api_factory(
+            throttler=self._throttler,
+            auth=self._auth
+        )
 
     async def _fetch_last_fee_payment(self) -> Tuple[int, Decimal, Decimal]:
         pass
@@ -65,8 +74,45 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
     ) -> TradeFeeBase:
         pass
 
-    def _initialize_trading_pair_symbols_from_exchange_info(self) -> Dict[str, str]:
-        pass
+    def _initialize_trading_pair_symbols_from_exchange_info(self, exchange_info: List) -> Dict[str, str]:
+        mapping = bidict()
+        # TODO update the list as we receive a list from the endpoint
+        for product_info in exchange_info:
+            exchange_symbol = product_info["symbol"]
+            base = product_info["baseAsset"]
+            quote = product_info["quoteAsset"]
+            trading_pair = combine_to_hb_trading_pair(base, quote)
+            if trading_pair in mapping.inverse:
+                self._resolve_trading_pair_symbols_duplicate(mapping, exchange_symbol, base, quote)
+            else:
+                mapping[exchange_symbol] = trading_pair
+        self._set_trading_pair_symbol_map(mapping)
+
+    def _resolve_trading_pair_symbols_duplicate(self, mapping: bidict, new_exchange_symbol: str, base: str, quote: str):
+        """Resolves name conflicts provoked by futures contracts.
+
+        If the expected BASEQUOTE combination matches one of the exchange symbols, it is the one taken, otherwise,
+        the trading pair is removed from the map and an error is logged.
+        """
+        expected_exchange_symbol = f"{base}{quote}"
+        trading_pair = combine_to_hb_trading_pair(base, quote)
+        current_exchange_symbol = mapping.inverse[trading_pair]
+        if current_exchange_symbol == expected_exchange_symbol:
+            pass
+        elif new_exchange_symbol == expected_exchange_symbol:
+            mapping.pop(current_exchange_symbol)
+            mapping[new_exchange_symbol] = trading_pair
+        else:
+            self.logger().error(
+                f"Could not resolve the exchange symbols {new_exchange_symbol} and {current_exchange_symbol}")
+            mapping.pop(current_exchange_symbol)
+
+    async def _initialize_trading_pair_symbol_map(self):
+        try:
+            exchange_info = await self._api_get(path_url=self.trading_pairs_request_path)
+            self._initialize_trading_pair_symbols_from_exchange_info(exchange_info=exchange_info)
+        except Exception:
+            self.logger().exception("There was an error requesting exchange info.")
 
     def _is_order_not_found_during_cancelation_error(self, cancelation_exception: Exception) -> bool:
         pass
@@ -156,7 +202,7 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
 
     @property
     def trading_pairs_request_path(self) -> str:
-        return CONSTANTS.EXCHANGE_INFO_URL
+        return CONSTANTS.PRODUCTS_URL
 
     @property
     def trading_rules_request_path(self) -> str:
@@ -167,10 +213,12 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
         return CONSTANTS.RATE_LIMITS
 
     def get_buy_collateral_token(self, trading_pair: str) -> str:
-        pass
+        trading_rule: TradingRule = self._trading_rules[trading_pair]
+        return trading_rule.buy_order_collateral_token
 
     def get_sell_collateral_token(self, trading_pair: str) -> str:
-        pass
+        trading_rule: TradingRule = self._trading_rules[trading_pair]
+        return trading_rule.sell_order_collateral_token
 
     def supported_order_types(self) -> List[OrderType]:
         return [OrderType.LIMIT, OrderType.MARKET, OrderType.LIMIT_MAKER]
