@@ -41,10 +41,6 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
         )
 
     @property
-    def all_symbols_including_invalid_pair_mock_response(self):
-        pass
-
-    @property
     def all_symbols_request_mock_response(self):
         mock_response = [
             {
@@ -67,6 +63,11 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
             }
         ]
         return mock_response
+
+    @property
+    def all_symbols_including_invalid_pair_mock_response(self):
+        mock_response = self.all_symbols_request_mock_response
+        return "INVALID-PAIR", mock_response
 
     @property
     def all_symbols_url(self):
