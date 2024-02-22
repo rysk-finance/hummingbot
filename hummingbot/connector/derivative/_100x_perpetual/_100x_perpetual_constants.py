@@ -25,6 +25,8 @@ RATE_LIMITS = [
     # Weight limits for individual endpoints
     RateLimit(limit_id=PRODUCTS_URL, limit=MAX_REQUEST, time_interval=60,
               linked_limits=[LinkedLimitWeightPair(limit_id=ALL_ENDPOINTS_LIMIT)]),
+    RateLimit(limit_id=PING_URl, limit=MAX_REQUEST, time_interval=60,
+              linked_limits=[LinkedLimitWeightPair(limit_id=ALL_ENDPOINTS_LIMIT)])
 ]
 
 LOGIN_MESSAGE = "I want to log into 100x.finance"

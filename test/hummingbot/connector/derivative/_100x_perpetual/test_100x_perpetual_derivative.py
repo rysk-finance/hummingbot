@@ -236,6 +236,7 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
     def latest_prices_url(self):
         pass
 
+    @property
     def network_status_request_successful_mock_response(self):
         mock_response = {
             "serverTime": 1708616915512
@@ -361,11 +362,19 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
         self.assertEqual(Decimal("10000"), available_balances["USD"])
         self.assertEqual(Decimal("10000"), total_balances["USD"])
 
+    """     @aioresponses()
+    def test_check_network_raises_cancel_exception(self, mock_api):
+        url = self.network_status_url
+
+        mock_api.post(url, exception=asyncio.CancelledError)
+
+        self.assertRaises(asyncio.CancelledError, self.async_run_with_timeout, self.exchange.check_network()) """
+
     @aioresponses()
     def test_check_network_success(self, mock_api):
         url = self.network_status_url
         response = self.network_status_request_successful_mock_response
-        mock_api.get(url, body=response)
+        mock_api.get(url, body=json.dumps(response))
 
         network_status = self.async_run_with_timeout(coroutine=self.exchange.check_network())
 

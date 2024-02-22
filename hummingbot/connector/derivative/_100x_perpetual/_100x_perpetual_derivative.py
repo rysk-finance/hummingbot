@@ -170,7 +170,7 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
 
     @property
     def check_network_request_path(self) -> str:
-        return CONSTANTS.PATH_TIME
+        return CONSTANTS.PING_URl
 
     @property
     def client_order_id_max_length(self) -> int:
