@@ -14,6 +14,7 @@ TESTNET_WS_URL = "wss://api.ciaobella.dev/"
 # Public API v1 Endpoints
 PRODUCTS_URL = "v1/products"
 LOGIN = "v1/session/login"
+PING_URl = "v1/time"
 
 MAX_REQUEST = 1_200
 ALL_ENDPOINTS_LIMIT = "All"

@@ -15,6 +15,7 @@ from hummingbot.connector.trading_rule import TradingRule
 from hummingbot.core.data_type.common import OrderType, PositionMode
 from hummingbot.core.data_type.in_flight_order import InFlightOrder
 from hummingbot.core.data_type.trade_fee import TradeFeeBase
+from hummingbot.core.network_iterator import NetworkStatus
 
 
 class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDerivativeTests):
@@ -236,10 +237,14 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
         pass
 
     def network_status_request_successful_mock_response(self):
-        pass
+        mock_response = {
+            "serverTime": 1708616915512
+        }
+        return mock_response
 
+    @property
     def network_status_url(self):
-        pass
+        return web_utils.public_rest_url(CONSTANTS.PING_URl, domain=self.domain)
 
     def order_creation_request_successful_mock_response(self):
         pass
@@ -355,3 +360,13 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
         self.assertNotIn(self.base_asset, total_balances)
         self.assertEqual(Decimal("10000"), available_balances["USD"])
         self.assertEqual(Decimal("10000"), total_balances["USD"])
+
+    @aioresponses()
+    def test_check_network_success(self, mock_api):
+        url = self.network_status_url
+        response = self.network_status_request_successful_mock_response
+        mock_api.get(url, body=response)
+
+        network_status = self.async_run_with_timeout(coroutine=self.exchange.check_network())
+
+        self.assertEqual(NetworkStatus.CONNECTED, network_status)
