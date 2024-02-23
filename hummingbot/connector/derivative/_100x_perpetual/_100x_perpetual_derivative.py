@@ -37,6 +37,8 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
         self._trading_pairs = trading_pairs
         self._trading_required = trading_required
         self._domain = domain
+        self.public_key = public_key
+        self.private_key = private_key
         super().__init__(client_config_map=client_config_map)
 
     async def _all_trade_updates_for_order(self, order_id: InFlightOrder) -> List[TradeUpdate]:
@@ -54,6 +56,14 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
             throttler=self._throttler,
             auth=self._auth
         )
+
+    async def _make_trading_rules_request(self) -> Any:
+        exchange_info = await self._api_post(path_url=self.trading_rules_request_path)
+        return exchange_info
+
+    async def _make_trading_pairs_request(self) -> Any:
+        exchange_info = await self._api_post(path_url=self.trading_pairs_request_path)
+        return exchange_info
 
     async def _fetch_last_fee_payment(self) -> Tuple[int, Decimal, Decimal]:
         pass
@@ -115,13 +125,13 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
             self.logger().exception("There was an error requesting exchange info.")
 
     def _is_order_not_found_during_cancelation_error(self, cancelation_exception: Exception) -> bool:
-        pass
+        return CONSTANTS.UNKNOWN_ORDER_MESSAGE in str(cancelation_exception)
 
     def _is_order_not_found_during_status_update_error(self, status_update_exception: Exception) -> bool:
-        pass
+        return CONSTANTS.ORDER_NOT_EXIST_MESSAGE in str(status_update_exception)
 
     def _is_request_exception_related_to_time_synchronizer(self, request_exception: Exception) -> bool:
-        pass
+        return False
 
     async def _place_cancel(self, order_id: str, tracked_order: InFlightOrder):
         pass
@@ -162,11 +172,11 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
 
     @property
     def name(self) -> str:
-        return CONSTANTS.EXCHANGE_NAME
+        return self.domain
 
     @property
     def authenticator(self) -> Class100xPerpetualAuth:
-        pass
+        return Class100xPerpetualAuth(self.public_key, self.private_key)
 
     @property
     def check_network_request_path(self) -> str:
@@ -174,11 +184,11 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
 
     @property
     def client_order_id_max_length(self) -> int:
-        return CONSTANTS.MAX_ID_LEN
+        return CONSTANTS.MAX_ORDER_ID_LEN
 
     @property
     def client_order_id_prefix(self) -> str:
-        return CONSTANTS.HBOT_BROKER_ID
+        return CONSTANTS.BROKER_ID
 
     @property
     def domain(self) -> str:
@@ -190,7 +200,7 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
 
     @property
     def is_cancel_request_in_exchange_synchronous(self) -> bool:
-        return False
+        return True
 
     @property
     def is_trading_required(self) -> bool:

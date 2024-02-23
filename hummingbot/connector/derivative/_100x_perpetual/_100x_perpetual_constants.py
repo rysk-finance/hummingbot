@@ -2,6 +2,9 @@ from hummingbot.core.api_throttler.data_types import LinkedLimitWeightPair, Rate
 
 EXCHANGE_NAME = "100x_perpetual"
 
+MAX_ORDER_ID_LEN = None
+BROKER_ID = ""
+
 DOMAIN = EXCHANGE_NAME
 TESTNET_DOMAIN = "100x_perpetual_testnet"
 
@@ -15,6 +18,7 @@ TESTNET_WS_URL = "wss://api.ciaobella.dev/"
 PRODUCTS_URL = "v1/products"
 LOGIN = "v1/session/login"
 PING_URl = "v1/time"
+EXCHANGE_INFO_URL = "v1/products"
 
 MAX_REQUEST = 1_200
 ALL_ENDPOINTS_LIMIT = "All"
@@ -30,3 +34,5 @@ RATE_LIMITS = [
 ]
 
 LOGIN_MESSAGE = "I want to log into 100x.finance"
+ORDER_NOT_EXIST_MESSAGE = "order"
+UNKNOWN_ORDER_MESSAGE = "Order was never placed, already canceled, or filled"

@@ -27,6 +27,8 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
         cls.quote_asset = "USDC"
         cls.trading_pair = f"{cls.base_asset}-{cls.quote_asset}"
         cls.domain = CONSTANTS.TESTNET_DOMAIN
+        cls.network_address = "0x836eE2b55d173245832995082a8600709c38D099"
+        cls.private_key = "13e56ca9cceebf1f33065c2c5376ab38570a114bc1b003b60d838f92be9d7930"  # noqa: mock
 
     def setUp(self) -> None:
         super().setUp()
@@ -35,8 +37,8 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
 
         self.exchange = Class100xPerpetualDerivative(
             client_config_map=self.client_config_map,
-            public_key="test_public",
-            private_key="test_private",
+            public_key=self.network_address,
+            private_key=self.private_key,
             trading_pairs=[self.trading_pair],
             domain=self.domain
         )
@@ -166,8 +168,8 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
         client_config_map = ClientConfigAdapter(ClientConfigMap())
         exchange = Class100xPerpetualDerivative(
             client_config_map=client_config_map,
-            public_key="test_public",
-            private_key="test_private",
+            public_key=self.network_address,
+            private_key=self.private_key,
             trading_pairs=[self.trading_pair],
             domain=self.domain
         )
@@ -361,14 +363,6 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
         self.assertNotIn(self.base_asset, total_balances)
         self.assertEqual(Decimal("10000"), available_balances["USD"])
         self.assertEqual(Decimal("10000"), total_balances["USD"])
-
-    """     @aioresponses()
-    def test_check_network_raises_cancel_exception(self, mock_api):
-        url = self.network_status_url
-
-        mock_api.post(url, exception=asyncio.CancelledError)
-
-        self.assertRaises(asyncio.CancelledError, self.async_run_with_timeout, self.exchange.check_network()) """
 
     @aioresponses()
     def test_check_network_success(self, mock_api):
