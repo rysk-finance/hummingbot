@@ -231,7 +231,7 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
         return trading_rule.sell_order_collateral_token
 
     def supported_order_types(self) -> List[OrderType]:
-        return [OrderType.LIMIT, OrderType.MARKET, OrderType.LIMIT_MAKER]
+        return [OrderType.LIMIT, OrderType.LIMIT_MAKER, OrderType.MARKET]
 
     def supported_position_modes(self):
         return [PositionMode.ONEWAY]

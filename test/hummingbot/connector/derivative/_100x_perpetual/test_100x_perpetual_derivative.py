@@ -202,8 +202,9 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
     def expected_partial_fill_price(self) -> Decimal:
         pass
 
+    @property
     def expected_supported_order_types(self) -> List[OrderType]:
-        pass
+        return [OrderType.LIMIT, OrderType.LIMIT_MAKER, OrderType.MARKET]
 
     def expected_supported_position_modes(self) -> List[PositionMode]:
         pass
