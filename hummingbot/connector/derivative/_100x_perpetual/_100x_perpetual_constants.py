@@ -19,6 +19,8 @@ PRODUCTS_URL = "v1/products"
 LOGIN = "v1/session/login"
 PING_URl = "v1/time"
 EXCHANGE_INFO_URL = "v1/products"
+ORDER_BOOK_DEPTH = "v1/depth"
+TICKER_PRICE_CHANGE_URL = "v1/ticker/24hr"
 
 MAX_REQUEST = 1_200
 ALL_ENDPOINTS_LIMIT = "All"
@@ -30,6 +32,12 @@ RATE_LIMITS = [
     RateLimit(limit_id=PRODUCTS_URL, limit=MAX_REQUEST, time_interval=60,
               linked_limits=[LinkedLimitWeightPair(limit_id=ALL_ENDPOINTS_LIMIT)]),
     RateLimit(limit_id=PING_URl, limit=MAX_REQUEST, time_interval=60,
+              linked_limits=[LinkedLimitWeightPair(limit_id=ALL_ENDPOINTS_LIMIT)]),
+    RateLimit(limit_id=EXCHANGE_INFO_URL, limit=MAX_REQUEST, time_interval=60,
+              linked_limits=[LinkedLimitWeightPair(limit_id=ALL_ENDPOINTS_LIMIT)]),
+    RateLimit(limit_id=ORDER_BOOK_DEPTH, limit=MAX_REQUEST, time_interval=60,
+              linked_limits=[LinkedLimitWeightPair(limit_id=ALL_ENDPOINTS_LIMIT)]),
+    RateLimit(limit_id=TICKER_PRICE_CHANGE_URL, limit=MAX_REQUEST, time_interval=60,
               linked_limits=[LinkedLimitWeightPair(limit_id=ALL_ENDPOINTS_LIMIT)])
 ]
 

@@ -98,6 +98,15 @@ class Class100xPerpetualDerivative(PerpetualDerivativePyBase):
                 mapping[exchange_symbol] = trading_pair
         self._set_trading_pair_symbol_map(mapping)
 
+    async def _get_last_traded_price(self, trading_pair: str) -> float:
+        exchange_symbol = await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair)
+        params = {"symbol": exchange_symbol}
+        response = await self._api_get(
+            path_url=CONSTANTS.TICKER_PRICE_CHANGE_URL,
+            params=params)
+        price = float(response["lastPrice"])
+        return price
+
     def _resolve_trading_pair_symbols_duplicate(self, mapping: bidict, new_exchange_symbol: str, base: str, quote: str):
         """Resolves name conflicts provoked by futures contracts.
 

@@ -233,11 +233,27 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
     def is_order_fill_http_update_included_in_status_update(self) -> bool:
         pass
 
+    @property
     def latest_prices_request_mock_response(self):
-        pass
+        mock_response = {
+            'productId': 1,
+            'volume': 69420,
+            'low': 69,
+            'high': 420,
+            'priceChange': 280,
+            'priceChangePercent': "508.66",
+            'fundingRate': "-0.01",
+            'lastPrice': 69.42
+        }
+        return mock_response
 
+    @property
     def latest_prices_url(self):
-        pass
+        url = web_utils.public_rest_url(
+            path_url=CONSTANTS.TICKER_PRICE_CHANGE_URL,
+            domain=self.domain
+        )
+        return url
 
     @property
     def network_status_request_successful_mock_response(self):
@@ -349,6 +365,20 @@ class Test100xPerpetualDerivative(AbstractPerpetualDerivativeTests.PerpetualDeri
 
         self.assertEqual(buy_collateral_token, self.quote_asset)
         self.assertEqual(sell_collateral_token, self.quote_asset)
+
+    @aioresponses()
+    def test_get_last_trade_prices(self, mock_api):
+        all_symbols = self.all_symbols_request_mock_response
+        first_symbol = all_symbols[0]['symbol']
+        url = f"{self.latest_prices_url}?symbol={first_symbol}"
+        response = self.latest_prices_request_mock_response
+        mock_api.get(url, body=json.dumps(response))
+        self.exchange._initialize_trading_pair_symbols_from_exchange_info(all_symbols)
+
+        latest_prices = self.async_run_with_timeout(
+            coroutine=self.exchange.get_last_traded_prices(trading_pairs=[self.trading_pair])
+        )
+        self.assertEqual(69.42, latest_prices[self.trading_pair])
 
     @aioresponses()
     def test_update_balances(self, mock_api):
